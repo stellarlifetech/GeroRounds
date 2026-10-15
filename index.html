@@ -2434,16 +2434,15 @@ function r1(){const g=S.game,c=g.c,st=document.getElementById("stage");
   <details class="casebox"><summary><b>Read the full case</b></summary><p style="margin:8px 0 0">${esc(c.full)}</p></details>
   <div class="opts">${items.map((it,i)=>`<button class="opt" data-r1="${i}" aria-pressed="false">${esc(it.t)}</button>`).join("")}</div>
   <div class="actions"><button class="btn" id="lock">Lock in answers</button><span class="note" id="selCount">0 selected</span></div><div id="fb"></div>`;
- const left=runTimer(75,()=>lockR1(0));g.step.left=left;
- document.getElementById("lock").onclick=()=>lockR1(Math.round(g.step.left()))}
+ document.getElementById("lock").onclick=()=>lockR1()}
 function lockR1(secLeft){const g=S.game,st=g.step;if(st.locked)return;st.locked=1;if(g.timerId){clearInterval(g.timerId);g.timerId=null}
  let pts=0,hits=0,wrong=0;st.items.forEach((it,i)=>{const b=document.querySelector(`[data-r1="${i}"]`);b.disabled=true;const on=st.sel.has(i);
   g.log.push({r:1,q:it.t,a:on?"Selected":"Not selected",ok:!!it.ok===on,right:(it.ok?"Select it. ":"Leave it unselected. ")+(g.c.risks.why[it.t]||""),cn:g.c.risks.cn});
   const why=esc(g.c.risks.why[it.t]||"");if(it.ok&&on){b.classList.add("good");b.innerHTML+=`<small>${why}</small>`;pts+=10;hits++}else if(!it.ok&&on){b.classList.add("bad");b.innerHTML+=`<small>Distractor. ${why}</small>`;pts-=5;wrong++}else if(it.ok){b.classList.add("missed");b.innerHTML+=`<small>Missed. ${why}</small>`}else b.innerHTML+=`<small>${why}</small>`});
- const nYes=st.items.filter(i=>i.ok).length;const bonus=hits===nYes&&!wrong?Math.min(20,Math.round(secLeft/2)):0;pts+=bonus;g.max+=nYes*10+20;
+ const nYes=st.items.filter(i=>i.ok).length;const bonus=hits===nYes&&!wrong?20:0;pts+=bonus;g.max+=nYes*10+20;
  g.correct+=hits;addScore(pts,document.getElementById("lock"));shift(4*hits-6*wrong-3*(nYes-hits));
  document.getElementById("lock").remove();document.getElementById("selCount").remove();
- document.getElementById("fb").innerHTML=`<div class="feedback ${wrong||hits<nYes?"no":"ok"}"><b>${hits}/${nYes} found, ${wrong} wrong pick${wrong===1?"":"s"}.</b> ${bonus?`Perfect round, +${bonus} speed bonus.`:""} Green = correct, dashed = missed.</div><div class="actions"><button class="btn dark" data-next>Next: ${RNAME[g.flow[g.round+1]]} →</button></div>`}
+ document.getElementById("fb").innerHTML=`<div class="feedback ${wrong||hits<nYes?"no":"ok"}"><b>${hits}/${nYes} found, ${wrong} wrong pick${wrong===1?"":"s"}.</b> ${bonus?`Perfect round, +${bonus} bonus.`:""} Green = correct, dashed = missed.</div><div class="actions"><button class="btn dark" data-next>Next: ${RNAME[g.flow[g.round+1]]} →</button></div>`}
 
 /* Round 2 — Make the call */
 function r2(){const g=S.game,c=g.c;g.step.i=g.step.i||0;const i=g.step.i,call=c.calls[i],st=document.getElementById("stage");
@@ -2473,10 +2472,10 @@ function pickR3(k){const g=S.game,st=g.step,s=st.pool[k],btn=document.querySelec
 /* Round 4 — Lightning T/F */
 function r4(){const g=S.game,c=g.c;if(g.step.i==null){g.step={i:0,streak:0};c.tf.forEach((_,i)=>g.max+=10+5*i)}
  const i=g.step.i,q=c.tf[i],st=document.getElementById("stage");g.step.answered=0;
- st.innerHTML=`<div class="eyebrow">Round ${g.round+1} · Question ${i+1} of ${c.tf.length} · 20 seconds</div>${nclexTag({cn:q[3]},g.prog)}
+ st.innerHTML=`<div class="eyebrow">Round ${g.round+1} · Question ${i+1} of ${c.tf.length}</div>${nclexTag({cn:q[3]},g.prog)}
   <div class="tf"><div class="streak">${g.step.streak>1?`Streak x${g.step.streak}!`:"Build a streak for bonus points"}</div><div class="stmt">${esc(q[0])}</div>
   <div class="btns"><button class="btn" data-tf="1">True</button><button class="btn dark" data-tf="0">False</button></div><div id="fb" style="width:100%;display:flex;flex-direction:column;align-items:center"></div></div>`;
- runTimer(20,()=>answerTF(null))}
+ }
 function answerTF(v){const g=S.game,st=g.step,q=g.c.tf[st.i];if(st.answered)return;st.answered=1;if(g.timerId){clearInterval(g.timerId);g.timerId=null}
  document.querySelectorAll("[data-tf]").forEach(b=>b.disabled=true);const ok=v!==null&&(v===1)===q[1];
  g.log.push({r:4,q:q[0],a:v===null?"No answer (time ran out)":v?"True":"False",ok,right:(q[1]?"True":"False")+". "+q[2],cn:q[3]});const btn=document.querySelector(`[data-tf="${v??1}"]`);
